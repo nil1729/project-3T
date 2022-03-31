@@ -19,14 +19,77 @@ const GAMES = {
 	// }
 };
 
-// const winner_check = (board_state) => {
-// 	let board_state_map = {};
-// 	board_state.forEach((item, index) => {
-// 		board_state_map[index] = item;
-// 	});
+const winner_check = (board_state) => {
+	let board_state_map = {};
+	let user_icon_player = {};
 
-// 	if(board_state_map[])
-// }
+	board_state.forEach((item, index) => {
+		if (item !== 0) {
+			board_state_map[index] = item.user_icon;
+			user_icon_player[item.user_icon] = item;
+		}
+	});
+
+	if (Object.keys(board_state_map).length >= 4) {
+		if (
+			board_state_map[0] === board_state_map[1] &&
+			board_state_map[1] === board_state_map[2] &&
+			board_state_map[2] === board_state_map[0]
+		)
+			return user_icon_player[board_state_map[0]];
+
+		if (
+			board_state_map[0] === board_state_map[3] &&
+			board_state_map[3] === board_state_map[6] &&
+			board_state_map[6] === board_state_map[0]
+		)
+			return user_icon_player[board_state_map[0]];
+
+		if (
+			board_state_map[0] === board_state_map[4] &&
+			board_state_map[4] === board_state_map[8] &&
+			board_state_map[8] === board_state_map[0]
+		)
+			return user_icon_player[board_state_map[0]];
+
+		if (
+			board_state_map[1] === board_state_map[4] &&
+			board_state_map[4] === board_state_map[7] &&
+			board_state_map[7] === board_state_map[1]
+		)
+			return user_icon_player[board_state_map[1]];
+
+		if (
+			board_state_map[2] === board_state_map[4] &&
+			board_state_map[4] === board_state_map[6] &&
+			board_state_map[6] === board_state_map[2]
+		)
+			return user_icon_player[board_state_map[2]];
+
+		if (
+			board_state_map[2] === board_state_map[5] &&
+			board_state_map[5] === board_state_map[8] &&
+			board_state_map[8] === board_state_map[2]
+		)
+			return user_icon_player[board_state_map[2]];
+
+		if (
+			board_state_map[3] === board_state_map[4] &&
+			board_state_map[4] === board_state_map[5] &&
+			board_state_map[5] === board_state_map[3]
+		)
+			return user_icon_player[board_state_map[3]];
+
+		if (
+			board_state_map[6] === board_state_map[7] &&
+			board_state_map[7] === board_state_map[8] &&
+			board_state_map[8] === board_state_map[6]
+		)
+			return user_icon_player[board_state_map[6]];
+
+		return null;
+	} else return null;
+};
 
 // Initialize App
 const app = express();
@@ -103,13 +166,6 @@ io.on('connection', (socket) => {
 			game_object.users[socket.id] = user_object;
 			const owner_id = game_object.owner;
 
-			const my_joined_games = Object.keys(GAMES)
-				.map((it) => {
-					if (GAMES[it].users[socket.id]) return GAMES[it];
-					else return null;
-				})
-				.filter((it) => it !== null);
-
 			const owner_games = Object.keys(GAMES)
 				.map((it) => {
 					if (GAMES[it].owner === owner_id) return GAMES[it];
@@ -117,7 +173,6 @@ io.on('connection', (socket) => {
 				})
 				.filter((it) => it !== null);
 
-			socket.emit('my_joined_games', JSON.stringify(my_joined_games));
 			socket.to(owner_id).emit('my_games', JSON.stringify(owner_games));
 			Object.keys(game_object.users).forEach((user_socket_id) => {
 				socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
@@ -180,6 +235,7 @@ io.on('connection', (socket) => {
 		game_object.board_state[data.board_index] = game_object.users[socket.id];
 
 		// Winner Check
+		game_object.winner = winner_check(game_object.board_state);
 
 		Object.keys(game_object.users).forEach((user_socket_id) => {
 			socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));

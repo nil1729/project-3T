@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Row, Col, Card, Form, FormGroup, Input, Label, Container } from 'reactstrap';
+import { Button, Row, Col, Card, Form, Input } from 'reactstrap';
 
 const HomePage = ({
 	joinGame,

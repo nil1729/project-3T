@@ -1,34 +1,17 @@
 import React, { useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import {
-	Button,
-	Row,
-	Col,
-	Card,
-	Form,
-	FormGroup,
-	Input,
-	Label,
-	Container,
-	ListGroup,
-	ListGroupItem,
-	Badge,
-} from 'reactstrap';
+import { useHistory } from 'react-router-dom';
+import { Button, Row, Col, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import './game.css';
 
-const GamePage = ({ client_id, joinOwnGame, current_game, startGame, playGame }) => {
+const GamePage = ({ client_id, current_game, startGame, playGame }) => {
 	const history = useHistory();
-	const params = useParams();
-
-	window.onbeforeunload = function () {
-		return 'Are you sure you want to leave? You are in the middle of something.';
-	};
 
 	useEffect(() => {
-		if (client_id) {
-			joinOwnGame(params.game_id);
+		if (!client_id) {
+			history.push('/');
 		}
-	}, [client_id]);
+		//eslint-disable-next-line
+	}, []);
 
 	return (
 		<>
@@ -80,7 +63,8 @@ const GamePage = ({ client_id, joinOwnGame, current_game, startGame, playGame })
 											current_game.playing &&
 											current_game.current_turn.user_icon ===
 												current_game.users[client_id].user_icon &&
-											tile === 0
+											tile === 0 &&
+											!current_game.winner
 												? { cursor: 'pointer' }
 												: { pointerEvents: 'none' }
 										}
@@ -111,7 +95,7 @@ const GamePage = ({ client_id, joinOwnGame, current_game, startGame, playGame })
 								</div>
 							</Row>
 						)}
-					{current_game.playing && (
+					{current_game.playing && !current_game.winner && (
 						<Row>
 							<div className='text-center mt-5'>
 								<p className='lead'>
@@ -120,6 +104,13 @@ const GamePage = ({ client_id, joinOwnGame, current_game, startGame, playGame })
 										{current_game.current_turn.user_icon}
 									</Badge>
 								</p>
+							</div>
+						</Row>
+					)}
+					{current_game.playing && current_game.winner && (
+						<Row>
+							<div className='text-center mt-5'>
+								<h3>Player {current_game.winner.user_icon} win the game</h3>
 							</div>
 						</Row>
 					)}

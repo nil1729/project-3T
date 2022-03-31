@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { io } from 'socket.io-client';
-import { Button, Row, Col, Card, Form, FormGroup, Input, Label, Container } from 'reactstrap';
-import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
+import { Container } from 'reactstrap';
+import { Switch, Route, useHistory } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import GamePage from './components/GamePage';
 
 const socket = io('http://localhost:5050');
 
 const App = () => {
+	window.onbeforeunload = function () {
+		return 'Are you sure you want to leave? You are in the middle of something.';
+	};
+
 	const history = useHistory();
 
 	const [client_id, set_client_id] = useState(null);
 	const [my_games, set_my_games] = useState([]);
-	const [my_joined_games, set_my_joined_games] = useState([]);
 	const [game_id_input, set_game_id_input] = useState('');
 	const [current_game, set_current_game] = useState(null);
 
@@ -84,15 +87,6 @@ const App = () => {
 		try {
 			const parsed_data = JSON.parse(data);
 			set_current_game(parsed_data);
-		} catch (e) {
-			console.log(e);
-		}
-	});
-
-	socket.on('my_joined_games', (data) => {
-		try {
-			const parsed_data = JSON.parse(data);
-			set_my_joined_games(parsed_data);
 		} catch (e) {
 			console.log(e);
 		}
