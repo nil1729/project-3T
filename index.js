@@ -246,6 +246,35 @@ io.on('connection', (socket) => {
 		});
 	});
 
+	socket.on('restart_game', (game_id, cb) => {
+		const game_object = GAMES[game_id];
+
+		if (
+			!game_object ||
+			(game_object && Object.keys(game_object.users).length < 2) ||
+			(game_object && game_object.users[socket.id].user_type !== 'player') ||
+			(game_object && !game_object.playing && !game_object.winner)
+		) {
+			cb({
+				error: 'Invalid Command',
+			});
+			return;
+		}
+
+		game_object.playing = true;
+		game_object.current_turn = game_object.users[socket.id];
+		game_object.winner = null;
+		game_object.board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+		Object.keys(game_object.users).forEach((user_socket_id) => {
+			socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
+		});
+
+		cb({
+			game_state: game_object,
+		});
+	});
+
 	socket.on('disconnect', () => {
 		const owner_ids = {};
 
@@ -277,7 +306,7 @@ io.on('connection', (socket) => {
 				});
 			}
 
-			if (GAMES[it].owner === socket.id && Object.keys(GAMES[it].users).length === 0)
+			if (GAMES[it] && GAMES[it].owner === socket.id && Object.keys(GAMES[it].users).length === 0)
 				delete GAMES[it];
 		});
 

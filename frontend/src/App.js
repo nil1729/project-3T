@@ -5,7 +5,7 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import GamePage from './components/GamePage';
 
-const socket = io('http://localhost:5050');
+const socket = process.env.NODE_ENV === 'production' ? io() : io('http://localhost:5050');
 
 const App = () => {
 	window.onbeforeunload = function () {
@@ -83,6 +83,16 @@ const App = () => {
 		});
 	};
 
+	const restartGame = (game_id) => {
+		socket.emit('restart_game', game_id, (cb) => {
+			if (cb && cb.error) {
+				alert(cb.error);
+			} else {
+				set_current_game(cb.game_state);
+			}
+		});
+	};
+
 	socket.on('my_current_game', (data) => {
 		try {
 			const parsed_data = JSON.parse(data);
@@ -114,6 +124,7 @@ const App = () => {
 							current_game={current_game}
 							startGame={startGame}
 							playGame={playGame}
+							restartGame={restartGame}
 						/>
 					</Route>
 				</Switch>

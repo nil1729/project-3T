@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Button, Row, Col, ListGroup, ListGroupItem, Badge } from 'reactstrap';
 import './game.css';
 
-const GamePage = ({ client_id, current_game, startGame, playGame }) => {
+const GamePage = ({ client_id, current_game, startGame, playGame, restartGame }) => {
 	const history = useHistory();
 
 	useEffect(() => {
@@ -58,7 +58,7 @@ const GamePage = ({ client_id, current_game, startGame, playGame }) => {
 							<section className='tile_container'>
 								{current_game.board_state.map((tile, key) => (
 									<div
-										className='tile bg-primary'
+										className='tile bg-primary text-light'
 										style={
 											current_game.playing &&
 											current_game.current_turn.user_icon ===
@@ -111,6 +111,15 @@ const GamePage = ({ client_id, current_game, startGame, playGame }) => {
 						<Row>
 							<div className='text-center mt-5'>
 								<h3>Player {current_game.winner.user_icon} win the game</h3>
+								<br />
+								<Button
+									color='info'
+									onClick={() => {
+										restartGame(current_game.game_id);
+									}}
+								>
+									Restart Game
+								</Button>
 							</div>
 						</Row>
 					)}
