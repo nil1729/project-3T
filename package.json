@@ -1,22 +1,25 @@
 {
-	"name": "project-3t",
-	"version": "1.0.0",
-	"description": "Multiplayer Tic-Tac-Toe Game ",
-	"main": "index.js",
-	"scripts": {
-		"start": "node .",
-		"start:dev": "NODE_ENV=development PORT=5050 nodemon . --config nodemon.json",
-		"start:frontend": "npm start --prefix frontend",
-		"build:frontend": "npm run deploy --prefix frontend"
-	},
-	"author": "Nilanjan Deb, Shaurya Marwah",
-	"license": "MIT",
-	"dependencies": {
-		"cors": "^2.8.5",
-		"express": "^4.17.3",
-		"mongoose": "^6.2.7",
-		"morgan": "^1.10.0",
-		"socket.io": "^4.4.1",
-		"uuid": "^8.3.2"
-	}
+  "name": "project-3t",
+  "version": "1.0.0",
+  "description": "Multiplayer Tic-Tac-Toe Game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "start:dev": "NODE_ENV=development PORT=5050 nodemon . --config nodemon.json",
+    "start:frontend": "npm start --prefix frontend",
+    "build:frontend": "npm run deploy --prefix frontend"
+  },
+  "author": "Nilanjan Deb",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "mongoose": "^6.2.7",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.4.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }

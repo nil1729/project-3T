@@ -1,107 +1,107 @@
-const express = require('express');
-const morgan = require('morgan');
-const errorHandler = require('./middleware/errorHanlder');
-const cors = require('cors');
+const express = require("express");
+const morgan = require("morgan");
+const errorHandler = require("./middleware/errorHanlder");
+const cors = require("cors");
 const PORT = process.env.PORT || 5050;
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const uuid = require('uuid');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const uuid = require("uuid");
 
 const GAMES = {
-	// "game_id": {
-	//  	game_id,
-	//		users: {}
-	//		owner: socket_id
-	// 		board_state: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-	//		current_turn: user_object
-	//		playing: false
-	//		winner: null
-	// }
+  // "game_id": {
+  //    game_id,
+  //    users: {}
+  //    owner: socket_id
+  //    board_state: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  //    current_turn: user_object
+  //    playing: false
+  //    winner: null
+  // }
 };
 
 const winner_check = (board_state) => {
-	let board_state_map = {};
-	let user_icon_player = {};
+  let board_state_map = {};
+  let user_icon_player = {};
 
-	board_state.forEach((item, index) => {
-		if (item !== 0) {
-			board_state_map[index] = item.user_icon;
-			user_icon_player[item.user_icon] = item;
-		}
-	});
+  board_state.forEach((item, index) => {
+    if (item !== 0) {
+      board_state_map[index] = item.user_icon;
+      user_icon_player[item.user_icon] = item;
+    }
+  });
 
-	if (Object.keys(board_state_map).length >= 4) {
-		if (
-			board_state_map[0] === board_state_map[1] &&
-			board_state_map[1] === board_state_map[2] &&
-			board_state_map[2] === board_state_map[0]
-		)
-			return user_icon_player[board_state_map[0]];
+  if (Object.keys(board_state_map).length >= 4) {
+    if (
+      board_state_map[0] === board_state_map[1] &&
+      board_state_map[1] === board_state_map[2] &&
+      board_state_map[2] === board_state_map[0]
+    )
+      return user_icon_player[board_state_map[0]];
 
-		if (
-			board_state_map[0] === board_state_map[3] &&
-			board_state_map[3] === board_state_map[6] &&
-			board_state_map[6] === board_state_map[0]
-		)
-			return user_icon_player[board_state_map[0]];
+    if (
+      board_state_map[0] === board_state_map[3] &&
+      board_state_map[3] === board_state_map[6] &&
+      board_state_map[6] === board_state_map[0]
+    )
+      return user_icon_player[board_state_map[0]];
 
-		if (
-			board_state_map[0] === board_state_map[4] &&
-			board_state_map[4] === board_state_map[8] &&
-			board_state_map[8] === board_state_map[0]
-		)
-			return user_icon_player[board_state_map[0]];
+    if (
+      board_state_map[0] === board_state_map[4] &&
+      board_state_map[4] === board_state_map[8] &&
+      board_state_map[8] === board_state_map[0]
+    )
+      return user_icon_player[board_state_map[0]];
 
-		if (
-			board_state_map[1] === board_state_map[4] &&
-			board_state_map[4] === board_state_map[7] &&
-			board_state_map[7] === board_state_map[1]
-		)
-			return user_icon_player[board_state_map[1]];
+    if (
+      board_state_map[1] === board_state_map[4] &&
+      board_state_map[4] === board_state_map[7] &&
+      board_state_map[7] === board_state_map[1]
+    )
+      return user_icon_player[board_state_map[1]];
 
-		if (
-			board_state_map[2] === board_state_map[4] &&
-			board_state_map[4] === board_state_map[6] &&
-			board_state_map[6] === board_state_map[2]
-		)
-			return user_icon_player[board_state_map[2]];
+    if (
+      board_state_map[2] === board_state_map[4] &&
+      board_state_map[4] === board_state_map[6] &&
+      board_state_map[6] === board_state_map[2]
+    )
+      return user_icon_player[board_state_map[2]];
 
-		if (
-			board_state_map[2] === board_state_map[5] &&
-			board_state_map[5] === board_state_map[8] &&
-			board_state_map[8] === board_state_map[2]
-		)
-			return user_icon_player[board_state_map[2]];
+    if (
+      board_state_map[2] === board_state_map[5] &&
+      board_state_map[5] === board_state_map[8] &&
+      board_state_map[8] === board_state_map[2]
+    )
+      return user_icon_player[board_state_map[2]];
 
-		if (
-			board_state_map[3] === board_state_map[4] &&
-			board_state_map[4] === board_state_map[5] &&
-			board_state_map[5] === board_state_map[3]
-		)
-			return user_icon_player[board_state_map[3]];
+    if (
+      board_state_map[3] === board_state_map[4] &&
+      board_state_map[4] === board_state_map[5] &&
+      board_state_map[5] === board_state_map[3]
+    )
+      return user_icon_player[board_state_map[3]];
 
-		if (
-			board_state_map[6] === board_state_map[7] &&
-			board_state_map[7] === board_state_map[8] &&
-			board_state_map[8] === board_state_map[6]
-		)
-			return user_icon_player[board_state_map[6]];
+    if (
+      board_state_map[6] === board_state_map[7] &&
+      board_state_map[7] === board_state_map[8] &&
+      board_state_map[8] === board_state_map[6]
+    )
+      return user_icon_player[board_state_map[6]];
 
-		return null;
-	} else return null;
+    return null;
+  } else return null;
 };
 
 // Initialize App
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-	cors: {
-		origin: '*',
-	},
+  cors: {
+    origin: "*",
+  },
 });
 
 // Logging Middleware
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
 // Body Parser Setup
 app.use(express.json());
@@ -113,216 +113,220 @@ app.use(cors());
 app.use(errorHandler);
 
 // Serve "Public" folder as a static directory
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + "/public"));
 
-io.on('connection', (socket) => {
-	socket.on('create_game', (message, cb) => {
-		let game_id = uuid.v4();
-		while (GAMES[game_id]) game_id = uuid.v4();
+io.on("connection", (socket) => {
+  socket.on("create_game", (message, cb) => {
+    let game_id = uuid.v4();
+    while (GAMES[game_id]) game_id = uuid.v4();
 
-		const game_object = {
-			game_id,
-			users: {},
-			owner: socket.id,
-			board_state: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-			current_turn: null,
-			playing: null,
-			winner: null,
-		};
+    const game_object = {
+      game_id,
+      users: {},
+      owner: socket.id,
+      board_state: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      current_turn: null,
+      playing: null,
+      winner: null,
+    };
 
-		GAMES[game_id] = game_object;
+    GAMES[game_id] = game_object;
 
-		const my_games = Object.keys(GAMES)
-			.map((it) => {
-				if (GAMES[it].owner === socket.id) return GAMES[it];
-				else return null;
-			})
-			.filter((it) => it !== null);
+    const my_games = Object.keys(GAMES)
+      .map((it) => {
+        if (GAMES[it].owner === socket.id) return GAMES[it];
+        else return null;
+      })
+      .filter((it) => it !== null);
 
-		socket.emit('my_games', JSON.stringify(my_games));
+    socket.emit("my_games", JSON.stringify(my_games));
 
-		cb();
-	});
+    cb();
+  });
 
-	socket.on('join_game', (game_id, cb) => {
-		const game_object = GAMES[game_id];
+  socket.on("join_game", (game_id, cb) => {
+    const game_object = GAMES[game_id];
 
-		if (!game_object) {
-			cb({
-				error: 'Invalid Game ID',
-			});
-			return;
-		}
+    if (!game_object) {
+      cb({
+        error: "Invalid Game ID",
+      });
+      return;
+    }
 
-		if (!game_object.users[socket.id]) {
-			const current_users_count = Object.keys(game_object.users).length;
+    socket.join(game_id);
 
-			const user_object = {
-				user_id: socket.id,
-				user_type: current_users_count >= 2 ? 'stalk' : 'player',
-				user_icon: current_users_count === 0 ? 'X' : current_users_count === 1 ? 'O' : null,
-			};
+    if (!game_object.users[socket.id]) {
+      const current_users_count = Object.keys(game_object.users).length;
 
-			game_object.users[socket.id] = user_object;
-			const owner_id = game_object.owner;
+      const user_object = {
+        user_id: socket.id,
+        user_type: current_users_count >= 2 ? "stalk" : "player",
+        user_icon:
+          current_users_count === 0
+            ? "X"
+            : current_users_count === 1
+            ? "O"
+            : null,
+      };
 
-			const owner_games = Object.keys(GAMES)
-				.map((it) => {
-					if (GAMES[it].owner === owner_id) return GAMES[it];
-					else return null;
-				})
-				.filter((it) => it !== null);
+      game_object.users[socket.id] = user_object;
+      const owner_id = game_object.owner;
 
-			socket.to(owner_id).emit('my_games', JSON.stringify(owner_games));
-			Object.keys(game_object.users).forEach((user_socket_id) => {
-				socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
-			});
-		}
+      const owner_games = Object.keys(GAMES)
+        .map((it) => {
+          if (GAMES[it].owner === owner_id) return GAMES[it];
+          else return null;
+        })
+        .filter((it) => it !== null);
 
-		cb({
-			game_state: game_object,
-		});
-	});
+      io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
+    }
 
-	socket.on('start_game', (game_id, cb) => {
-		const game_object = GAMES[game_id];
+    cb();
+  });
 
-		if (
-			!game_object ||
-			(game_object && Object.keys(game_object.users).length < 2) ||
-			(game_object && game_object.users[socket.id].user_type !== 'player') ||
-			(game_object && game_object.playing)
-		) {
-			cb({
-				error: 'Invalid Command',
-			});
-			return;
-		}
+  socket.on("start_game", (game_id, cb) => {
+    const game_object = GAMES[game_id];
 
-		game_object.playing = true;
-		game_object.current_turn = game_object.users[socket.id];
+    if (
+      !game_object ||
+      (game_object && Object.keys(game_object.users).length < 2) ||
+      (game_object && game_object.users[socket.id].user_type !== "player") ||
+      (game_object && game_object.playing)
+    ) {
+      cb({
+        error: "Invalid Command",
+      });
+      return;
+    }
 
-		Object.keys(game_object.users).forEach((user_socket_id) => {
-			socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
-		});
+    game_object.playing = true;
+    game_object.current_turn = game_object.users[socket.id];
 
-		cb({
-			game_state: game_object,
-		});
-	});
+    io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
 
-	socket.on('play_game', (data, cb) => {
-		const game_object = GAMES[data.game_id];
+    cb({
+      game_state: game_object,
+    });
+  });
 
-		if (
-			!game_object ||
-			data.board_index >= 9 ||
-			(game_object && Object.keys(game_object.users).length < 2) ||
-			(game_object && game_object.users[socket.id].user_type !== 'player') ||
-			(game_object && !game_object.playing) ||
-			(game_object && game_object.board_state[data.board_index] !== 0)
-		) {
-			cb({
-				error: 'Invalid Command',
-			});
-			return;
-		}
+  socket.on("play_game", (data, cb) => {
+    const game_object = GAMES[data.game_id];
 
-		const second_player_id = Object.keys(game_object.users).find(
-			(key) => game_object.users[key].user_type === 'player' && key !== socket.id
-		);
-		game_object.current_turn = game_object.users[second_player_id];
-		game_object.board_state[data.board_index] = game_object.users[socket.id];
+    if (
+      !game_object ||
+      data.board_index >= 9 ||
+      (game_object && Object.keys(game_object.users).length < 2) ||
+      (game_object && game_object.users[socket.id].user_type !== "player") ||
+      (game_object && !game_object.playing) ||
+      (game_object && game_object.board_state[data.board_index] !== 0)
+    ) {
+      cb({
+        error: "Invalid Command",
+      });
+      return;
+    }
 
-		// Winner Check
-		game_object.winner = winner_check(game_object.board_state);
+    const second_player_id = Object.keys(game_object.users).find(
+      (key) =>
+        game_object.users[key].user_type === "player" && key !== socket.id
+    );
+    game_object.current_turn = game_object.users[second_player_id];
+    game_object.board_state[data.board_index] = game_object.users[socket.id];
 
-		Object.keys(game_object.users).forEach((user_socket_id) => {
-			socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
-		});
+    // Winner Check
+    game_object.winner = winner_check(game_object.board_state);
 
-		cb({
-			game_state: game_object,
-		});
-	});
+    io.to(data.game_id).emit("my_current_game", JSON.stringify(game_object));
 
-	socket.on('restart_game', (game_id, cb) => {
-		const game_object = GAMES[game_id];
+    cb({
+      game_state: game_object,
+    });
+  });
 
-		if (
-			!game_object ||
-			(game_object && Object.keys(game_object.users).length < 2) ||
-			(game_object && game_object.users[socket.id].user_type !== 'player') ||
-			(game_object && !game_object.playing && !game_object.winner)
-		) {
-			cb({
-				error: 'Invalid Command',
-			});
-			return;
-		}
+  socket.on("restart_game", (game_id, cb) => {
+    const game_object = GAMES[game_id];
 
-		game_object.playing = true;
-		game_object.current_turn = game_object.users[socket.id];
-		game_object.winner = null;
-		game_object.board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    if (
+      !game_object ||
+      (game_object && Object.keys(game_object.users).length < 2) ||
+      (game_object && game_object.users[socket.id].user_type !== "player") ||
+      (game_object && !game_object.playing && !game_object.winner)
+    ) {
+      cb({
+        error: "Invalid Command",
+      });
+      return;
+    }
 
-		Object.keys(game_object.users).forEach((user_socket_id) => {
-			socket.to(user_socket_id).emit('my_current_game', JSON.stringify(game_object));
-		});
+    game_object.playing = true;
+    game_object.current_turn = game_object.users[socket.id];
+    game_object.winner = null;
+    game_object.board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-		cb({
-			game_state: game_object,
-		});
-	});
+    io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
 
-	socket.on('disconnect', () => {
-		const owner_ids = {};
+    cb({
+      game_state: game_object,
+    });
+  });
 
-		Object.keys(GAMES).forEach((it) => {
-			if (GAMES[it].users[socket.id]) {
-				owner_ids[GAMES[it].owner] = 'OWNER';
+  socket.on("disconnect", () => {
+    const owner_ids = {};
 
-				if (GAMES[it].users[socket.id].user_type === 'player') {
-					for (user_socket_id of Object.keys(GAMES[it].users)) {
-						if (
-							user_socket_id !== socket.id &&
-							GAMES[it].users[user_socket_id].user_type !== 'player'
-						) {
-							GAMES[it].users[user_socket_id].user_type = 'player';
-							GAMES[it].users[user_socket_id].user_icon = GAMES[it].users[socket.id].user_icon;
-						}
-					}
+    Object.keys(GAMES).forEach((it) => {
+      if (GAMES[it].users[socket.id]) {
+        owner_ids[GAMES[it].owner] = "OWNER";
 
-					GAMES[it].board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-					GAMES[it].current_turn = null;
-					GAMES[it].playing = null;
-					GAMES[it].winner = null;
-				}
+        if (GAMES[it].users[socket.id].user_type === "player") {
+          for (user_socket_id of Object.keys(GAMES[it].users)) {
+            if (
+              user_socket_id !== socket.id &&
+              GAMES[it].users[user_socket_id].user_type !== "player"
+            ) {
+              GAMES[it].users[user_socket_id].user_type = "player";
+              GAMES[it].users[user_socket_id].user_icon =
+                GAMES[it].users[socket.id].user_icon;
+            }
+          }
 
-				delete GAMES[it].users[socket.id];
+          GAMES[it].board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+          GAMES[it].current_turn = null;
+          GAMES[it].playing = null;
+          GAMES[it].winner = null;
+        }
 
-				Object.keys(GAMES[it].users).forEach((user_socket_id) => {
-					socket.to(user_socket_id).emit('my_current_game', JSON.stringify(GAMES[it]));
-				});
-			}
+        delete GAMES[it].users[socket.id];
 
-			if (GAMES[it] && GAMES[it].owner === socket.id && Object.keys(GAMES[it].users).length === 0)
-				delete GAMES[it];
-		});
+        Object.keys(GAMES[it].users).forEach((user_socket_id) => {
+          socket
+            .to(user_socket_id)
+            .emit("my_current_game", JSON.stringify(GAMES[it]));
+        });
+      }
 
-		for (let owner_id of Object.keys(owner_ids)) {
-			const owner_games = Object.keys(GAMES)
-				.map((it) => {
-					if (GAMES[it].owner === owner_id) return GAMES[it];
-					else return null;
-				})
-				.filter((it) => it !== null);
-			socket.to(owner_id).emit('my_games', JSON.stringify(owner_games));
-		}
-	});
+      if (
+        GAMES[it] &&
+        GAMES[it].owner === socket.id &&
+        Object.keys(GAMES[it].users).length === 0
+      )
+        delete GAMES[it];
+    });
+
+    for (let owner_id of Object.keys(owner_ids)) {
+      const owner_games = Object.keys(GAMES)
+        .map((it) => {
+          if (GAMES[it].owner === owner_id) return GAMES[it];
+          else return null;
+        })
+        .filter((it) => it !== null);
+      socket.to(owner_id).emit("my_games", JSON.stringify(owner_games));
+    }
+  });
 });
 
 // PORT Setup and Server Setup on PORT
 httpServer.listen(PORT, async () => {
-	console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
