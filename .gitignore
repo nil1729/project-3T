@@ -4,3 +4,6 @@ config.env
 .vscode
 public
 build
+
+# Local Netlify folder
+.netlify
