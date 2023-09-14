@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v1
       - name: Use Node.js 14.15.5
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 14.15.5
       - run: npm run setup:frontend
