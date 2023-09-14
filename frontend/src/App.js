@@ -1,12 +1,9 @@
-import { useState } from "react";
-import { io } from "socket.io-client";
+import { useState, useEffect } from "react";
 import { Container } from "reactstrap";
 import { Switch, Route, useHistory } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import GamePage from "./components/GamePage";
-
-const socket =
-  process.env.NODE_ENV === "production" ? io() : io("http://localhost:5050");
+import { socket } from "./socket";
 
 const App = () => {
   window.onbeforeunload = function () {
@@ -20,8 +17,24 @@ const App = () => {
   const [game_id_input, set_game_id_input] = useState("");
   const [current_game, set_current_game] = useState(null);
 
-  socket.on("connect", () => {
-    set_client_id(socket.id);
+  useEffect(() => {
+    socket.on("connect", () => {
+      set_client_id(socket.id);
+    });
+
+    socket.on("my_current_game", (data) => {
+      set_current_game(data);
+    });
+
+    socket.on("my_games", (data) => {
+      set_my_games(data);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("my_current_game");
+      socket.off("my_games");
+    };
   });
 
   const createNewGame = () => {
@@ -30,25 +43,13 @@ const App = () => {
     });
   };
 
-  socket.on("my_games", (data) => {
-    try {
-      const parsed_data = JSON.parse(data);
-      set_my_games(parsed_data);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
   const joinGame = (e) => {
     e.preventDefault();
-
     socket.emit("join_game", game_id_input, (cb) => {
       if (cb && cb.error) alert(cb.error);
-      else {
-        history.push(`/play/${game_id_input}`);
-        set_game_id_input("");
-      }
     });
+    history.push(`/play/${game_id_input}`);
+    set_game_id_input("");
   };
 
   const joinOwnGame = (game_id) => {
@@ -56,28 +57,23 @@ const App = () => {
       if (cb && cb.error) {
         alert(cb.error);
         history.push("/");
-      } else {
-        history.push(`/play/${game_id}`);
       }
     });
+    history.push(`/play/${game_id}`);
   };
 
   const startGame = (game_id) => {
     socket.emit("start_game", game_id, (cb) => {
       if (cb && cb.error) {
         alert(cb.error);
-      } else {
-        set_current_game(cb.game_state);
       }
     });
   };
 
   const playGame = (game_id, board_index) => {
-    socket.emit("play_game", { game_id, board_index }, (cb) => {
+    socket.emit("play_game", game_id, board_index, (cb) => {
       if (cb && cb.error) {
         alert(cb.error);
-      } else {
-        set_current_game(cb.game_state);
       }
     });
   };
@@ -86,20 +82,9 @@ const App = () => {
     socket.emit("restart_game", game_id, (cb) => {
       if (cb && cb.error) {
         alert(cb.error);
-      } else {
-        set_current_game(cb.game_state);
       }
     });
   };
-
-  socket.on("my_current_game", (data) => {
-    try {
-      const parsed_data = JSON.parse(data);
-      set_current_game(parsed_data);
-    } catch (e) {
-      console.log(e);
-    }
-  });
 
   return (
     <div className="App">

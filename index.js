@@ -115,8 +115,16 @@ app.use(errorHandler);
 // Serve "Public" folder as a static directory
 app.use(express.static(__dirname + "/public"));
 
+// Routes Setup (Mounting Routes)
+app.use("/api/v1", require("./routes"));
+
+// PORT Setup and Server Setup on PORT
+httpServer.listen(PORT, async () => {
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
+
 io.on("connection", (socket) => {
-  socket.on("create_game", (message, cb) => {
+  socket.on("create_game", (...args) => {
     let game_id = uuid.v4();
     while (GAMES[game_id]) game_id = uuid.v4();
 
@@ -139,9 +147,10 @@ io.on("connection", (socket) => {
       })
       .filter((it) => it !== null);
 
-    socket.emit("my_games", JSON.stringify(my_games));
+    socket.emit("my_games", my_games);
 
-    cb();
+    // don't need to acknowledge the callback
+    // cb(1, 2, 3, 4, 5);
   });
 
   socket.on("join_game", (game_id, cb) => {
@@ -179,11 +188,9 @@ io.on("connection", (socket) => {
           else return null;
         })
         .filter((it) => it !== null);
-
-      io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
+      socket.to(owner_id).emit("my_games", owner_games);
+      io.to(game_id).emit("my_current_game", game_object);
     }
-
-    cb();
   });
 
   socket.on("start_game", (game_id, cb) => {
@@ -204,23 +211,20 @@ io.on("connection", (socket) => {
     game_object.playing = true;
     game_object.current_turn = game_object.users[socket.id];
 
-    io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
-
-    cb({
-      game_state: game_object,
-    });
+    io.to(game_id).emit("my_current_game", game_object);
   });
 
-  socket.on("play_game", (data, cb) => {
-    const game_object = GAMES[data.game_id];
+  socket.on("play_game", (game_id, board_index, cb) => {
+    const game_object = GAMES[game_id];
 
     if (
       !game_object ||
-      data.board_index >= 9 ||
+      board_index >= 9 ||
+      game_object.current_turn.user_id !== socket.id ||
       (game_object && Object.keys(game_object.users).length < 2) ||
       (game_object && game_object.users[socket.id].user_type !== "player") ||
       (game_object && !game_object.playing) ||
-      (game_object && game_object.board_state[data.board_index] !== 0)
+      (game_object && game_object.board_state[board_index] !== 0)
     ) {
       cb({
         error: "Invalid Command",
@@ -233,16 +237,12 @@ io.on("connection", (socket) => {
         game_object.users[key].user_type === "player" && key !== socket.id
     );
     game_object.current_turn = game_object.users[second_player_id];
-    game_object.board_state[data.board_index] = game_object.users[socket.id];
+    game_object.board_state[board_index] = game_object.users[socket.id];
 
     // Winner Check
     game_object.winner = winner_check(game_object.board_state);
 
-    io.to(data.game_id).emit("my_current_game", JSON.stringify(game_object));
-
-    cb({
-      game_state: game_object,
-    });
+    io.to(game_id).emit("my_current_game", game_object);
   });
 
   socket.on("restart_game", (game_id, cb) => {
@@ -265,11 +265,7 @@ io.on("connection", (socket) => {
     game_object.winner = null;
     game_object.board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    io.to(game_id).emit("my_current_game", JSON.stringify(game_object));
-
-    cb({
-      game_state: game_object,
-    });
+    io.to(game_id).emit("my_current_game", game_object);
   });
 
   socket.on("disconnect", () => {
@@ -324,9 +320,4 @@ io.on("connection", (socket) => {
       socket.to(owner_id).emit("my_games", JSON.stringify(owner_games));
     }
   });
-});
-
-// PORT Setup and Server Setup on PORT
-httpServer.listen(PORT, async () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
