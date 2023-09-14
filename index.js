@@ -15,7 +15,8 @@ const GAMES = {
   //    board_state: [0, 0, 0, 0, 0, 0, 0, 0, 0]
   //    current_turn: user_object
   //    playing: false
-  //    winner: null
+  //    winner: null,
+  //    tie: false
   // }
 };
 
@@ -32,63 +33,107 @@ const winner_check = (board_state) => {
 
   if (Object.keys(board_state_map).length >= 4) {
     if (
+      board_state_map[0] &&
+      board_state_map[1] &&
+      board_state_map[2] &&
       board_state_map[0] === board_state_map[1] &&
       board_state_map[1] === board_state_map[2] &&
       board_state_map[2] === board_state_map[0]
-    )
+    ) {
       return user_icon_player[board_state_map[0]];
+    }
 
     if (
+      board_state_map[0] &&
+      board_state_map[3] &&
+      board_state_map[6] &&
       board_state_map[0] === board_state_map[3] &&
       board_state_map[3] === board_state_map[6] &&
       board_state_map[6] === board_state_map[0]
-    )
+    ) {
       return user_icon_player[board_state_map[0]];
+    }
 
     if (
+      board_state_map[0] &&
+      board_state_map[4] &&
+      board_state_map[8] &&
       board_state_map[0] === board_state_map[4] &&
       board_state_map[4] === board_state_map[8] &&
       board_state_map[8] === board_state_map[0]
-    )
+    ) {
       return user_icon_player[board_state_map[0]];
+    }
 
     if (
+      board_state_map[1] &&
+      board_state_map[4] &&
+      board_state_map[7] &&
       board_state_map[1] === board_state_map[4] &&
       board_state_map[4] === board_state_map[7] &&
       board_state_map[7] === board_state_map[1]
-    )
+    ) {
       return user_icon_player[board_state_map[1]];
+    }
 
     if (
+      board_state_map[2] &&
+      board_state_map[4] &&
+      board_state_map[6] &&
       board_state_map[2] === board_state_map[4] &&
       board_state_map[4] === board_state_map[6] &&
       board_state_map[6] === board_state_map[2]
-    )
+    ) {
       return user_icon_player[board_state_map[2]];
+    }
 
     if (
+      board_state_map[2] &&
+      board_state_map[5] &&
+      board_state_map[8] &&
       board_state_map[2] === board_state_map[5] &&
       board_state_map[5] === board_state_map[8] &&
       board_state_map[8] === board_state_map[2]
-    )
+    ) {
       return user_icon_player[board_state_map[2]];
+    }
 
     if (
+      board_state_map[3] &&
+      board_state_map[4] &&
+      board_state_map[5] &&
       board_state_map[3] === board_state_map[4] &&
       board_state_map[4] === board_state_map[5] &&
       board_state_map[5] === board_state_map[3]
-    )
+    ) {
       return user_icon_player[board_state_map[3]];
+    }
 
     if (
+      board_state_map[6] &&
+      board_state_map[7] &&
+      board_state_map[8] &&
       board_state_map[6] === board_state_map[7] &&
       board_state_map[7] === board_state_map[8] &&
       board_state_map[8] === board_state_map[6]
-    )
+    ) {
       return user_icon_player[board_state_map[6]];
-
-    return null;
+    }
   } else return null;
+};
+
+const tie_check = (board_state) => {
+  let board_state_map = {};
+
+  board_state.forEach((item, index) => {
+    if (item !== 0) {
+      board_state_map[index] = item.user_icon;
+    }
+  });
+
+  if (Object.keys(board_state_map).length === 9) {
+    return true;
+  } else return false;
 };
 
 // Initialize App
@@ -243,6 +288,7 @@ io.on("connection", (socket) => {
 
     // Winner Check
     game_object.winner = winner_check(game_object.board_state);
+    game_object.tie = tie_check(game_object.board_state);
 
     io.to(game_id).emit("my_current_game", game_object);
   });
@@ -266,6 +312,7 @@ io.on("connection", (socket) => {
     game_object.playing = true;
     game_object.current_turn = game_object.users[socket.id];
     game_object.winner = null;
+    game_object.tie = false;
     game_object.board_state = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     io.to(game_id).emit("my_current_game", game_object);
@@ -299,9 +346,7 @@ io.on("connection", (socket) => {
         delete GAMES[it].users[socket.id];
 
         Object.keys(GAMES[it].users).forEach((user_socket_id) => {
-          socket
-            .to(user_socket_id)
-            .emit("my_current_game", JSON.stringify(GAMES[it]));
+          socket.to(user_socket_id).emit("my_current_game", GAMES[it]);
         });
       }
 

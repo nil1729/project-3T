@@ -114,11 +114,17 @@ const GamePage = ({
             </Row>
           )}
           {current_game.playing &&
-            current_game.winner &&
+            (current_game.winner || current_game.tie) &&
             current_game.users[client_id]?.user_type === "player" && (
               <Row>
                 <div className="text-center mt-5">
-                  <h3>Player {current_game.winner.user_icon} win the game</h3>
+                  {current_game.winner ? (
+                    <h3>Player {current_game.winner.user_icon} win the game</h3>
+                  ) : current_game.tie ? (
+                    <h3>Match Tied</h3>
+                  ) : (
+                    <h3>Something went wrong</h3>
+                  )}
                   <br />
                   <Button
                     color="info"
