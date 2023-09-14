@@ -2,6 +2,9 @@
 
 This is a simple multiplayer Tic-Tac-Toe game built using React.js and Socket.io. It allows two players to play the classic game of Tic-Tac-Toe in real-time over the internet. Players can take turns to make moves, and the game will display the winner or a draw when the game ends.
 
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/EizViJ?referralCode=jxqKWD)
+![Github Actions Netlify](https://github.com/nil1729/in-memory-socket-server/actions/workflows/netlify-deploy.yaml/badge.svg)
+
 ## Table of Contents
 
 - [Demo](#demo)
