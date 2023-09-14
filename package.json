@@ -7,7 +7,8 @@
     "start": "node .",
     "start:dev": "NODE_ENV=development PORT=5050 nodemon . --config nodemon.json",
     "start:frontend": "npm start --prefix frontend",
-    "build:frontend": "npm run deploy --prefix frontend"
+    "setup:frontend": "npm install --prefix frontend",
+    "build:frontend": "npm run deploy --prefix frontend && mv frontend/build ."
   },
   "author": "Nilanjan Deb",
   "license": "MIT",
