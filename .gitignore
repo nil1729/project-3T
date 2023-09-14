@@ -2,7 +2,6 @@ node_modules
 package-lock.json
 config.env
 .vscode
-public
 build
 
 # Local Netlify folder
