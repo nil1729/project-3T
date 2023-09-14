@@ -202,6 +202,7 @@ io.on("connection", (socket) => {
       (game_object && game_object.users[socket.id].user_type !== "player") ||
       (game_object && game_object.playing)
     ) {
+      console.error("start_game", { game_id, board_index, cb });
       cb({
         error: "Invalid Command",
       });
@@ -226,6 +227,7 @@ io.on("connection", (socket) => {
       (game_object && !game_object.playing) ||
       (game_object && game_object.board_state[board_index] !== 0)
     ) {
+      console.error("play_game", { game_id, board_index, cb });
       cb({
         error: "Invalid Command",
       });
@@ -254,6 +256,7 @@ io.on("connection", (socket) => {
       (game_object && game_object.users[socket.id].user_type !== "player") ||
       (game_object && !game_object.playing && !game_object.winner)
     ) {
+      console.error("restart_game", { game_id, board_index, cb });
       cb({
         error: "Invalid Command",
       });

@@ -46,7 +46,10 @@ const App = () => {
   const joinGame = (e) => {
     e.preventDefault();
     socket.emit("join_game", game_id_input, (cb) => {
-      if (cb && cb.error) alert(cb.error);
+      if (cb && cb.error) {
+        console.error("join_game", { game_id: game_id_input, cb });
+        alert(cb.error);
+      }
     });
     history.push(`/play/${game_id_input}`);
     set_game_id_input("");
@@ -55,6 +58,7 @@ const App = () => {
   const joinOwnGame = (game_id) => {
     socket.emit("join_game", game_id, (cb) => {
       if (cb && cb.error) {
+        console.error("join_game", { game_id, cb });
         alert(cb.error);
         history.push("/");
       }
@@ -65,6 +69,7 @@ const App = () => {
   const startGame = (game_id) => {
     socket.emit("start_game", game_id, (cb) => {
       if (cb && cb.error) {
+        console.error("start_game", { game_id, cb });
         alert(cb.error);
       }
     });
@@ -73,6 +78,7 @@ const App = () => {
   const playGame = (game_id, board_index) => {
     socket.emit("play_game", game_id, board_index, (cb) => {
       if (cb && cb.error) {
+        console.error("play_game", { game_id, board_index, cb });
         alert(cb.error);
       }
     });
@@ -81,6 +87,7 @@ const App = () => {
   const restartGame = (game_id) => {
     socket.emit("restart_game", game_id, (cb) => {
       if (cb && cb.error) {
+        console.error("restart_game", { game_id, cb });
         alert(cb.error);
       }
     });
